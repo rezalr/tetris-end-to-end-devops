@@ -1,45 +1,98 @@
-# 🚀 End-to-End DevSecOps Kubernetes Project 🌐
-
+## 🚀 End-to-End DevSecOps Kubernetes Project
 
 ![Infrastructure Diagram](assets/Infra.gif)
 
-Welcome to an immersive DevSecOps learning experience! This project guides you through deploying a Tetris game on AWS EKS while mastering the art of DevSecOps.
+An end-to-end DevSecOps learning project that deploys a Tetris game to AWS EKS using Terraform, builds and ships images with CI/CD, and applies security tooling across the pipeline.
 
-## Directories 📂
+### Repository Structure
 
-1. **EKS-TF:** Explore Terraform scripts for deploying EKS clusters on AWS.
-2. **Jenkins-Pipeline-Code:** Jenkins pipeline code for automated CI/CD.
-3. **Jenkins-Server-TF:** Terraform scripts for provisioning Jenkins servers on AWS EC2.
-4. **Manifest-file:** Kubernetes manifest files for Tetris application deployment.
-5. **Tetris-V1:** Initial version of the Tetris game application.
-6. **Tetris-V2:** Enhanced version of the Tetris game application.
+- **Infra**: Terraform for AWS networking, IAM, and EKS cluster/node groups.
+- **Jenkins-Infra**: Terraform to provision a Jenkins EC2 instance with required IAM and tools.
+- **Jenkins-Pipeline-Code**: Jenkinsfiles for building, scanning, and deploying Tetris.
+- **Manifest-file**: Kubernetes Deployment and Service for the Tetris app.
+- **Tetris-V1**: React Tetris implementation (version 1) with Dockerfile.
+- **Tetris-V2**: React Tetris implementation (version 2) with Dockerfile.
 
-## Getting Started 🚀
+### Prerequisites
 
-1. **Clone the Repository:**
-   ```bash
-   git clone https://github.com/rezalr/End-to-End-Kubernetes-DevSecOps-Tetris-Project.git
-2. **Explore the Directories:**
-   Navigate into each directory to find detailed scripts, pipelines, and configurations.
+- AWS account and credentials configured (e.g., `aws configure`)
+- Terraform ≥ 1.4, kubectl, Docker
+- Optional: Jenkins server (use `Jenkins-Infra`) and a container registry (e.g., ECR/Docker Hub)
 
-3. **Follow the Blog:**
-   Implementation details and insights are documented in the associated [blog post](https://amanpathakdevops.medium.com/devsecops-mastery-a-step-by-step-guide-to-deploying-tetris-on-aws-eks-with-jenkins-and-argocd-3adcf21b3120).
+### Quick Start
 
-## Tools Explored 🛠️
-1. **Jenkins:** Automated CI/CD pipelines
-2. **ArgoCD:** Continuous deployment to Kubernetes
-3. **Kubernetes:** Orchestration for containerized applications
-4. **Trivy:** Container vulnerability scanner
-5. **OWASP Dependency-Check:** Ensuring secure dependencies
-6. **Docker:** Containerized application deployment
-7. **SonarQube:** Unveiling code quality insights
-8. **Terraform:** Infrastructure as Code for AWS EKS
+1) Clone
+```bash
+git clone https://github.com/rezalr/End-to-End-Kubernetes-DevSecOps-Tetris-Project.git
+cd End-to-End-Kubernetes-DevSecOps-Tetris-Project
+```
 
-## Blog Implementation 📝
-   To implement this project, follow the step-by-step guide in our detailed [blog post](https://amanpathakdevops.medium.com/devsecops-mastery-a-step-by-step-guide-to-deploying-tetris-on-aws-eks-with-jenkins-and-argocd-3adcf21b3120). Learn how each tool plays a crucial role in achieving DevSecOps excellence.
+2) Run locally (choose V1 or V2)
+```bash
+cd Tetris-V1   # or Tetris-V2
+npm install
+npm start
+```
 
-## Acknowledgments 🙌
-   Special thanks to the open-source community and the contributors who make learning and collaboration an incredible journey.
+3) Build Docker image
+```bash
+cd Tetris-V1   # or Tetris-V2
+docker build -t tetris:local .
+```
 
-## License 📄
-   This project is licensed under the Apache-2.0 license see the [LICENSE](http://www.apache.org/licenses/) file for details.# End-to-End-Kubernetes-DevSecOps-Tetris-Project
+4) Deploy to Kubernetes (existing cluster)
+```bash
+kubectl apply -f Manifest-file/deployment-service.yml
+kubectl get pods,svc
+```
+
+### Provision AWS EKS with Terraform
+
+1) Initialize and plan
+```bash
+cd Infra
+terraform init
+terraform plan -var-file=variables.tfvars
+```
+
+2) Apply
+```bash
+terraform apply -var-file=variables.tfvars -auto-approve
+```
+
+3) Update kubeconfig
+```bash
+aws eks update-kubeconfig --name <your-eks-cluster-name> --region <your-region>
+```
+
+Then deploy the manifests from `Manifest-file` as shown above.
+
+### Provision Jenkins with Terraform (optional)
+
+1) Create Jenkins EC2
+```bash
+cd Jenkins-Infra
+terraform init
+terraform apply -var-file=variables.tfvars -auto-approve
+```
+
+2) Use the public IP to access Jenkins, install recommended plugins, and configure credentials (AWS, registry, GitHub). Refer to `Jenkins-Pipeline-Code` for `Jenkinsfile-*` examples:
+- `Jenkinsfile-EKS-Terraform`: Infra pipeline
+- `Jenkinsfile-TetrisV1`: Build/scan/deploy Tetris V1
+- `Jenkinsfile-TetrisV2`: Build/scan/deploy Tetris V2
+
+### Security Tooling
+
+- Trivy for container image scanning
+- OWASP Dependency-Check for dependency vulnerabilities
+- SonarQube for code quality and security hotspots
+
+Integrate these in Jenkins or run locally as needed.
+
+### Learn More
+
+Follow the detailed guide in this blog: [DevSecOps Mastery — Deploying Tetris on AWS EKS with Jenkins and ArgoCD](https://amanpathakdevops.medium.com/devsecops-mastery-a-step-by-step-guide-to-deploying-tetris-on-aws-eks-with-jenkins-and-argocd-3adcf21b3120)
+
+### License
+
+This project is licensed under the Apache-2.0 license. See the official [LICENSE](http://www.apache.org/licenses/) for details.
